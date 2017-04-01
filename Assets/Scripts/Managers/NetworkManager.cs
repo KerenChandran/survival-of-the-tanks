@@ -63,8 +63,9 @@ public class NetworkManager : MonoBehaviour {
 		socket.Emit("playerRotate", new JSONObject(data));
 	}
 
-	public void CommandShoot() {
-		socket.Emit ("playerShoot");
+	public void CommandShoot(float launchForce) {
+		string data = JsonUtility.ToJson (new LaunchForceJSON(launchForce));
+		socket.Emit ("playerShoot", new JSONObject(data));
 	}
 
 	public void CommandHealthChange(string playerFrom, string playerTo, float damage) {
@@ -154,6 +155,7 @@ public class NetworkManager : MonoBehaviour {
 
 		GameObject p = GameObject.Find (shootData.name);
 		TankShooting s = p.GetComponent<TankShooting> ();
+		s.setCurrentLaunchForce (shootData.launchForce);
 		s.CmdFire ();
 	}
 
@@ -238,10 +240,21 @@ public class NetworkManager : MonoBehaviour {
 		}
 	}
 
+	[Serializable]
+	public class LaunchForceJSON
+	{
+		public float launchForce;
+
+		public LaunchForceJSON (float launchForce) {
+			this.launchForce = launchForce;
+		}
+	}
+
 	// Instantiates Bullet
 	[Serializable]
 	public class ShootJSON {
 		public string name;
+		public float launchForce;
 
 		public static ShootJSON CreateFromJSON(string data) {
 			return JsonUtility.FromJson<ShootJSON> (data);

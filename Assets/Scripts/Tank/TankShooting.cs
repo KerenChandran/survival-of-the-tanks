@@ -48,7 +48,7 @@ public class TankShooting : MonoBehaviour
 			m_CurrentLaunchForce = m_MaxLaunchForce;
 //			CmdFire ();
 			NetworkManager n = NetworkManager.instance.GetComponent<NetworkManager> ();
-			n.CommandShoot ();
+			n.CommandShoot (m_CurrentLaunchForce);
 		} else if (Input.GetButtonDown (m_FireButton)) {
 			// Have we just pressed button for the first time?
 			m_Fired = false;
@@ -66,7 +66,7 @@ public class TankShooting : MonoBehaviour
 			// Released Fire Button
 //			CmdFire();
 			NetworkManager n = NetworkManager.instance.GetComponent<NetworkManager> ();
-			n.CommandShoot ();
+			n.CommandShoot (m_CurrentLaunchForce);
 		}
 	}
 
@@ -90,5 +90,9 @@ public class TankShooting : MonoBehaviour
 		m_ShootingAudio.Play ();
 
 		m_CurrentLaunchForce = m_MinLaunchForce;
+	}
+
+	public void setCurrentLaunchForce(float launchForce) {
+		m_CurrentLaunchForce = launchForce;
 	}
 }
