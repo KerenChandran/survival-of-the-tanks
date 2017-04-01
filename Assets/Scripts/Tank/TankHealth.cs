@@ -7,15 +7,17 @@ public class TankHealth : MonoBehaviour
 	public Slider m_Slider;                        
 	public Image m_FillImage;                      
 	public Color m_FullHealthColor = Color.green;  
-	public Color m_ZeroHealthColor = Color.red;    
+	public Color m_ZeroHealthColor = Color.red;
 	public GameObject m_ExplosionPrefab;
+
+	[HideInInspector]
+	public float m_CurrentHealth;
 
 
 	private AudioSource m_ExplosionAudio;          
 	private ParticleSystem m_ExplosionParticles;   
-	private float m_CurrentHealth;  
 	private bool m_Dead;            
-	private bool isLocalPlayer;
+	public bool isLocalPlayer;
 
 	private void Awake()
 	{
@@ -37,10 +39,17 @@ public class TankHealth : MonoBehaviour
 		SetHealthUI();
 	}
 
-	public void TakeDamage(float amount)
+	public void TakeDamage(string playerFrom, string playerTo, float damage)
 	{
 		// Adjust the tank's current health, update the UI based on the new health and check whether or not the tank is dead.
-		m_CurrentHealth -= amount;
+		m_CurrentHealth -= damage;
+
+		NetworkManager n = NetworkManager.instance.GetComponent<NetworkManager> ();
+		n.CommandHealthChange (playerFrom, playerTo, damage);
+//		OnHealthChange();
+	}
+
+	public void OnHealthChange() {
 		SetHealthUI ();
 
 		if (m_CurrentHealth <= 0f && !m_Dead) {

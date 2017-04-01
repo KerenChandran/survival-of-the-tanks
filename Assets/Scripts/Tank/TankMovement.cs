@@ -35,6 +35,7 @@ public class TankMovement : MonoBehaviour {
 		m_OriginalPitch = m_MovementAudio.pitch;
 
 		m_Rigidbody = GetComponent<Rigidbody> ();
+
 		m_CameraOffset = new Vector3 (0f, m_CameraHeight, -m_CameraDistance);
 
 		m_MainCamera = Camera.main.transform;
@@ -57,6 +58,11 @@ public class TankMovement : MonoBehaviour {
 		// Store the player's input and make sure the audio for the engine is playing.
 		m_TurnAmount = Input.GetAxis ("Horizontal");
 		m_MoveAmount = Input.GetAxis ("Vertical");
+
+		// Move and turn the tank.
+		Move ();
+		Turn ();
+		MoveCamera ();
 
 		EngineAudio ();
 	}
@@ -81,19 +87,28 @@ public class TankMovement : MonoBehaviour {
 
 	}
 
-	private void FixedUpdate()
-	{
-		// Move and turn the tank.
-		Move ();
-		Turn ();
-		MoveCamera ();
-	}
+//	private void FixedUpdate()
+//	{
+//		if (!isLocalPlayer) {
+//			return;
+//		}
+//		// Move and turn the tank.
+//		Move ();
+//		Turn ();
+//		MoveCamera ();
+//	}
 
 
 	private void Move()
 	{
 		// Adjust the position of the tank based on the player's input.
 		m_Movement = transform.forward * m_MoveAmount * m_MovementSpeed * Time.deltaTime;
+
+		if (m_OldMovement != m_Movement) {
+			m_OldMovement = m_Movement;
+			NetworkManager.instance.GetComponent<NetworkManager> ().CommandMove (m_Rigidbody.position + m_Movement);
+		}
+
 		m_Rigidbody.MovePosition (m_Rigidbody.position + m_Movement);
 	}
 
@@ -103,13 +118,22 @@ public class TankMovement : MonoBehaviour {
 		// Adjust the rotation of the tank based on the player's input.
 		float turn = m_TurnAmount * m_TurnSpeed * Time.deltaTime;
 		m_Turn = Quaternion.Euler (0f, turn, 0f);
+
+		if (m_OldTurn != m_Turn) {
+			m_OldTurn = m_Turn;
+			NetworkManager.instance.GetComponent<NetworkManager> ().CommandRotate (m_Rigidbody.rotation * m_Turn);
+		}
+
+
 		m_Rigidbody.MoveRotation (m_Rigidbody.rotation * m_Turn);
 	}
 
 	private void MoveCamera() {
-		m_MainCamera.position = transform.position;
-		m_MainCamera.rotation = transform.rotation;
-		m_MainCamera.Translate (m_CameraOffset);
-		m_MainCamera.LookAt (transform);
+		if (isLocalPlayer) {
+			m_MainCamera.position = transform.position;
+			m_MainCamera.rotation = transform.rotation;
+			m_MainCamera.Translate (m_CameraOffset);
+			m_MainCamera.LookAt (transform);
+		}
 	}
 }

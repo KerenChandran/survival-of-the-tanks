@@ -846,7 +846,7 @@ MonoBehaviour:
   m_EngineDriving: {fileID: 8300000, guid: d7ca9fb5aa30155449192b23d7fb3336, type: 3}
   m_MovementAudio: {fileID: 82636030948327542}
   m_PitchRange: 0.2
-  isLocalPlayer: 0
+  isLocalPlayer: 1
 --- !u!114 &114617670201025176
 MonoBehaviour:
   m_ObjectHideFlags: 1
