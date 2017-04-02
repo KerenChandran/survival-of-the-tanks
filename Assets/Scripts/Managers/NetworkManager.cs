@@ -83,6 +83,8 @@ public class NetworkManager : MonoBehaviour {
 		UserJSON userData = UserJSON.CreateFromJSON (data);
 		Vector3 position = new Vector3 (userData.position [0], userData.position [1], userData.position [2]);
 		Quaternion rotation = Quaternion.Euler (0f, userData.rotation, 0f);
+		Color playerColor;
+		ColorUtility.TryParseHtmlString (userData.playerColor, out playerColor);
 
 		var tank = GameObject.Find (userData.name) as GameObject;
 		if (tank != null) {
@@ -101,6 +103,12 @@ public class NetworkManager : MonoBehaviour {
 		TankHealth health = p.GetComponent<TankHealth> ();
 		health.m_CurrentHealth = userData.health;
 		health.OnHealthChange ();
+
+		MeshRenderer[] renderers = p.GetComponentsInChildren<MeshRenderer> ();
+		for (int i = 0; i < renderers.Length; i++)
+		{
+			renderers[i].material.color = playerColor;
+		}
 	}
 
 	void onPlay(SocketIOEvent socketIOEvent) {
@@ -108,6 +116,8 @@ public class NetworkManager : MonoBehaviour {
 		UserJSON currentUserData = UserJSON.CreateFromJSON (data);
 		Vector3 position = new Vector3 (currentUserData.position [0], currentUserData.position [1], currentUserData.position [2]);
 		Quaternion rotation = Quaternion.Euler (0f, currentUserData.rotation, 0f);
+		Color playerColor;
+		ColorUtility.TryParseHtmlString (currentUserData.playerColor, out playerColor);
 
 		GameObject p = Instantiate(player, position, rotation) as GameObject;
 		p.name = currentUserData.name;
@@ -119,6 +129,11 @@ public class NetworkManager : MonoBehaviour {
 		TankMovement movement = p.GetComponent<TankMovement> ();
 		movement.isLocalPlayer = true;
 
+		MeshRenderer[] renderers = p.GetComponentsInChildren<MeshRenderer> ();
+		for (int i = 0; i < renderers.Length; i++)
+		{
+			renderers[i].material.color = playerColor;
+		}
 	}
 
 	void onPlayerMove(SocketIOEvent socketIOEvent) {
@@ -200,6 +215,7 @@ public class NetworkManager : MonoBehaviour {
 		public float[] position;
 		public float rotation;
 		public float health;
+		public string playerColor;
 
 		public static UserJSON CreateFromJSON(string data) {
 			return JsonUtility.FromJson<UserJSON> (data);
