@@ -8,9 +8,15 @@ using SocketIO;
 public class NetworkManager : MonoBehaviour {
 
 	public static NetworkManager instance;
-	public Canvas canvas;
+	public Canvas userNameCanvas;
+//	public Canvas battleRoomCanvas;
+
 	public SocketIOComponent socket;
+
+	public Text battleRooms;
+	public InputField battleRoomIdInput;
 	public InputField playerNameInput;
+
 	public GameObject player;
 
 	public void Awake() {
@@ -37,20 +43,42 @@ public class NetworkManager : MonoBehaviour {
 		StartCoroutine (ConnectToServer ());
 	}
 
+	public void SendUser() {
+//		StartCoroutine (UserToServer ());
+		StartCoroutine (ConnectToServer ());
+	}
+
 	#region Commands
 
+//	IEnumerator UserToServer() {
+//		string playerName = playerNameInput.text;
+//		PlayerJSON playerJSON = new PlayerJSON (playerName, "-1");
+//		string data = JsonUtility.ToJson (playerJSON);
+//
+//		yield return new WaitForSeconds (0.5f);
+//		socket.Emit ("updatePlayerName", new JSONObject (data));
+//		yield return new WaitForSeconds (1f);
+//
+//		//userNameCanvas.gameObject.SetActive (false);
+//	}
+
 	IEnumerator ConnectToServer() {
+		string battleRoomId = battleRoomIdInput.text;
+		BattleInfoJSON roomData = new BattleInfoJSON (battleRoomId);
+		string roomDataString = JsonUtility.ToJson (roomData);
+
+
+		socket.Emit ("joinRoom", new JSONObject (roomDataString));
+
 		yield return new WaitForSeconds (0.5f);
-		socket.Emit ("playerConnected");
+		socket.Emit ("playerConnected", new JSONObject(roomDataString));
 		yield return new WaitForSeconds (1f);
 
-		string playerName = playerNameInput.text;
-
-		PlayerJSON playerJSON = new PlayerJSON (playerName);
+		PlayerJSON playerJSON = new PlayerJSON (playerNameInput.text, battleRoomId);
 		string data = JsonUtility.ToJson (playerJSON);
 		socket.Emit("play", new JSONObject(data));
 
-		canvas.gameObject.SetActive (false);
+		userNameCanvas.gameObject.SetActive (false);
 	}
 
 	public void CommandMove(Vector3 movement) {
@@ -77,6 +105,22 @@ public class NetworkManager : MonoBehaviour {
 
 
 	#region Listening
+
+//	public void availableRooms (SocketIOEvent socketIOEvent) {
+//		Debug.Log ("Available Rooms");
+//
+//		string data = socketIOEvent.ToString ();
+//		RoomsJSON roomsData = RoomsJSON.CreateFromJSON (data);
+//
+//		Debug.Log (roomsData);
+//
+//		string output = "";
+//		for (int i = 0; i < roomsData.rooms.Length; i++) {
+//			output += roomsData.rooms [i].id + " - " + roomsData.rooms [i].name;
+//		}
+//
+//		battleRooms.text = output;
+//	}
 
 	void onPlayerConnected(SocketIOEvent socketIOEvent) {
 		string data = socketIOEvent.data.ToString ();
@@ -197,16 +241,6 @@ public class NetworkManager : MonoBehaviour {
 
 	#region JSONMessageClasses
 
-	[Serializable]
-	public class PlayerJSON
-	{
-		public string name;
-
-		public PlayerJSON(string _name) {
-			name = _name;
-		}
-	}
-
 	// Notifies when another player joins the game
 	[Serializable]
 	public class UserJSON
@@ -288,8 +322,47 @@ public class NetworkManager : MonoBehaviour {
 		}
 	}
 
+	[Serializable]
+	public class PlayerJSON
+	{
+		public string name;
+		public string roomId;
 
+		public PlayerJSON(string _name, string _roomId) {
+			name = _name;
+			roomId = _roomId;
+		}
+	}
 
+	[Serializable]
+	public class BattleInfoJSON
+	{
+		public string roomId;
+
+		public BattleInfoJSON(string _battleRoomId) {
+			roomId = _battleRoomId;
+		}
+	}
+
+	[Serializable]
+	public class RoomsJSON {
+		public RoomJSON[] rooms;
+
+		public static RoomsJSON CreateFromJSON (string data) {
+			return JsonUtility.FromJson<RoomsJSON> (data);
+		}
+	}
+
+	[Serializable]
+	public class RoomJSON {
+		public string name;
+		public string id;
+
+		public RoomJSON (string _name, string _id) {
+			name = _name;
+			id = _id;
+		}
+	}
 
 	#endregion
 
