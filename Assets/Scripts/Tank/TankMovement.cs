@@ -55,6 +55,7 @@ public class TankMovement : MonoBehaviour {
 		if (!isLocalPlayer) {
 			return;
 		}
+		print ("Framerate: " + 1.0f / Time.deltaTime);
 		// Store the player's input and make sure the audio for the engine is playing.
 		m_TurnAmount = Input.GetAxis ("Horizontal");
 		m_MoveAmount = Input.GetAxis ("Vertical");

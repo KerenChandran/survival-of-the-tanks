@@ -9,7 +9,6 @@ public class NetworkManager : MonoBehaviour {
 
 	public static NetworkManager instance;
 	public Canvas userNameCanvas;
-//	public Canvas battleRoomCanvas;
 
 	public SocketIOComponent socket;
 
@@ -43,24 +42,7 @@ public class NetworkManager : MonoBehaviour {
 		StartCoroutine (ConnectToServer ());
 	}
 
-	public void SendUser() {
-//		StartCoroutine (UserToServer ());
-		StartCoroutine (ConnectToServer ());
-	}
-
 	#region Commands
-
-//	IEnumerator UserToServer() {
-//		string playerName = playerNameInput.text;
-//		PlayerJSON playerJSON = new PlayerJSON (playerName, "-1");
-//		string data = JsonUtility.ToJson (playerJSON);
-//
-//		yield return new WaitForSeconds (0.5f);
-//		socket.Emit ("updatePlayerName", new JSONObject (data));
-//		yield return new WaitForSeconds (1f);
-//
-//		//userNameCanvas.gameObject.SetActive (false);
-//	}
 
 	IEnumerator ConnectToServer() {
 		string battleRoomId = battleRoomIdInput.text;
@@ -105,22 +87,6 @@ public class NetworkManager : MonoBehaviour {
 
 
 	#region Listening
-
-//	public void availableRooms (SocketIOEvent socketIOEvent) {
-//		Debug.Log ("Available Rooms");
-//
-//		string data = socketIOEvent.ToString ();
-//		RoomsJSON roomsData = RoomsJSON.CreateFromJSON (data);
-//
-//		Debug.Log (roomsData);
-//
-//		string output = "";
-//		for (int i = 0; i < roomsData.rooms.Length; i++) {
-//			output += roomsData.rooms [i].id + " - " + roomsData.rooms [i].name;
-//		}
-//
-//		battleRooms.text = output;
-//	}
 
 	void onPlayerConnected(SocketIOEvent socketIOEvent) {
 		string data = socketIOEvent.data.ToString ();
